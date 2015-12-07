@@ -17,9 +17,9 @@
 		</div>
 	  </div>
 	</div>
-	
+
 	<div class="container">
-		
+
 		<% message = notice_message %>
 		<% if message and not message.empty? %>
 			<div id='flash' class='notice'>
@@ -30,17 +30,17 @@
 						  <%= message %>
 						</div>
 					</div>
-				</div>		
+				</div>
 			</div>
 		<% end %>
-		
+
 		<%= yield %>
 
 
 		<!-- Footer -->
 		<div class="row">
 			<div class="span12"><hr/></div>
-		</div>		
+		</div>
 		<div class="row">
  		  <div class="span4">&nbsp;</div>
 		  <div class="span4">

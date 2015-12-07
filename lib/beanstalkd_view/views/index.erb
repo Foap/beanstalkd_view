@@ -1,6 +1,6 @@
 <% @page_meta='<meta http-equiv="refresh" content="5">'%>
 <div class="row">
-	<div class="span6">
+	<div class="span12">
       <h1>Overview</h1>
 
       <table class="table">
@@ -16,24 +16,8 @@
         </tbody>
       </table>
 
+      <div class="span5">
       <table class="table">
-        <thead>
-          <tr>
-            <th>Tubes</th>
-          </tr>
-        </thead>
-        <tbody>
-        <% tube_names = [] %>
-		    <% @tubes.each do |tube| %>
-          <% tube_names << tube.name.strip %>
-  		    <tr>
-  			    <td><a href="<%= u("/tube/#{CGI::escape(tube.name)}") %>"><%= tube.name %></a></td>
-  		    </tr>
-		    <% end %>
-		    </tbody>
-      </table>
-
-    	<table class="table">
         <thead>
           <tr>
             <th colspan="2">Current Jobs</th>
@@ -42,11 +26,11 @@
         <tbody>
           <tr rel="tooltip" title="The number of ready jobs with priority < 1024.">
             <td>Urgent</td>
-      			<% if @stats[:current_jobs_urgent] > 0 %>
+            <% if @stats[:current_jobs_urgent] > 0 %>
                     <td class="data_cell"><span class="badge badge-warning"><%= @stats[:current_jobs_urgent] %></span></td>
-      			<% else %>
+            <% else %>
                     <td class="data_cell"><%= @stats[:current_jobs_urgent] %></td>
-      			<% end %>
+            <% end %>
           </tr>
           <tr rel="tooltip" title="The number of jobs in the ready queue.">
             <td>Ready</td>
@@ -62,44 +46,78 @@
           </tr>
           <tr rel="tooltip" title="The number of buried jobs.">
             <td>Buried</td>
-      			<% if @stats[:current_jobs_buried] > 0 %>
+            <% if @stats[:current_jobs_buried] > 0 %>
                     <td class="data_cell"><span class="badge badge-error"><%= @stats[:current_jobs_buried] %></span></td>
-      			<% else %>
+            <% else %>
               <td class="data_cell"><%= @stats[:current_jobs_buried] %></td>
             <% end %>
           </tr>
         </tbody>
       </table>
+      </div>
+
+      <div class="span5">
+      <table class="table">
+       <thead>
+          <tr>
+            <th colspan="2">Meta Statistics</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr rel="tooltip" title="The rate of job bury calls to reserve calls.">
+            <td>Bury Rate</td>
+            <% bury_reserve_rate = (@stats[:cmd_bury].to_f / @stats[:cmd_reserve].to_f) %>
+            <% bury_reserve_rate = 0 if bury_reserve_rate.nan? %>
+            <% if bury_reserve_rate > 0.01 %>
+              <td class="data_cell"><span class="badge badge-error"><%= bury_reserve_rate %></span></td>
+            <% else %>
+              <td class="data_cell"><%= bury_reserve_rate %></td>
+            <% end %>
+          </tr>
+          <tr rel="tooltip" title="The rate of job timeouts to reserve calls.">
+            <td>Timeout Rate</td>
+            <% timeout_reserve_rate = (@stats[:job_timeouts].to_f / @stats[:cmd_reserve].to_f) %>
+            <% timeout_reserve_rate = 0 if timeout_reserve_rate.nan? %>
+            <% if timeout_reserve_rate > 0.01 %>
+              <td class="data_cell"><span class="badge badge-error"><%= timeout_reserve_rate %></span></td>
+            <% else %>
+              <td class="data_cell"><%= timeout_reserve_rate %></td>
+            <% end %>
+          </tr>
+          <tr>
+            <td>Current Workers</td>
+            <td class="data_cell"><%= @stats[:current_workers] %></td>
+          </tr>
+          <tr>
+            <td>Current Waiting</td>
+            <td class="data_cell"><%= @stats[:current_waiting] %></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
 
       <table class="table">
-	     <thead>
-	        <tr>
-	          <th colspan="2">Meta Statistics</th>
-	        </tr>
-	      </thead>
-	      <tbody>
-	        <tr rel="tooltip" title="The rate of job bury calls to reserve calls.">
-	          <td>Bury Rate</td>
-    			  <% bury_reserve_rate = (@stats[:cmd_bury].to_f / @stats[:cmd_reserve].to_f) %>
-    			  <% bury_reserve_rate = 0 if bury_reserve_rate.nan? %>
-    			  <% if bury_reserve_rate > 0.01 %>
-	          	<td class="data_cell"><span class="badge badge-error"><%= bury_reserve_rate %></span></td>
-	          <% else %>
-	            <td class="data_cell"><%= bury_reserve_rate %></td>
-	          <% end %>
-	        </tr>
-			    <tr rel="tooltip" title="The rate of job timeouts to reserve calls.">
-	          <td>Timeout Rate</td>
-	          <% timeout_reserve_rate = (@stats[:job_timeouts].to_f / @stats[:cmd_reserve].to_f) %>
-	          <% timeout_reserve_rate = 0 if timeout_reserve_rate.nan? %>
-    			  <% if timeout_reserve_rate > 0.01 %>
-	          	<td class="data_cell"><span class="badge badge-error"><%= timeout_reserve_rate %></span></td>
-	          <% else %>
-	            <td class="data_cell"><%= timeout_reserve_rate %></td>
-	          <% end %>
-	        </tr>
-	 	    </tbody>
-	    </table>
+        <thead>
+          <tr>
+            <th>Tubes</th>
+            <th>Jobs Buried</th>
+            <th>Bury Rate</th>
+            <th>Total Jobs</th>
+          </tr>
+        </thead>
+        <tbody>
+        <% tube_names = [] %>
+		    <% @tubes.each do |tube| %>
+          <% tube_names << tube.name.strip %>
+  		    <tr>
+  			    <td><a href="<%= u("/tube/#{CGI::escape(tube.name)}") %>"><%= tube.name %></a></td>
+            <td><%= tube.stats.current_jobs_buried %> </td>
+            <td><%= tube.stats.cmd_reserve.to_f == 0.0 ? 0 : tube.stats.cmd_bury.to_f / tube.stats.cmd_reserve.to_f %> </td>
+            <td><%= tube.stats.total_jobs %> </td>
+  		    </tr>
+		    <% end %>
+		    </tbody>
+      </table>
 
       <table class="table">
         <thead>
@@ -277,43 +295,18 @@
         </tbody>
       </table>
 	</div>
-	
-	<div class="span6">
-		<div class="span6">
-      <h3>Add Job</h3>
-			<form id="add_job_form" class="well" name="add_job_form" action="<%= u("/add_job") %>" method="POST">
-			  <input id="form_tube_name" type="text" class="span3" placeholder="Tube name" name="tube" data-provide="typeahead" autocomplete="off" data-tubes='<%= "#{tube_names.to_json.to_s}" %>'>
-			  <input id="form_job_priority" type="text" class="span3" placeholder="Priority, e.g. 65536" name="priority">
-			  <input id="form_job_delay" type="text" class="span3" placeholder="Delay, e.g. 0" name="delay">
-			  <input id="form_job_ttr" type="text" class="span3" placeholder="TTR, e.g. 120" name="ttr">
-			  <label class="control-label" for="form_job_body">Job Body JSON Hash, e.g. {} or {"id": 1, "name": "Bob"}</label>
-			  <textarea id="form_job_body" class="input-xlarge" name="body" rows="3"></textarea>
-			  <br/>
-			  <a id="add_job_btn" href="#" class="btn">Add Job</a>
-			</form>
+
+	<div class="span12">
+		<div id="total_jobs_container">
+			<h3>Total Jobs</h3>
+      <canvas id="total_jobs_chart" data-set='<%= "#{@total_jobs_data.to_json.to_s}" %>'></canvas>
 		</div>
-		
-		<div class="span6">
-			<h3>Peek Range</h3>
-			<form id="peek_range_form" class="well form-inline" name="peek_range_form" action="<%= u("/peek-range") %>" method="GET">
-			  <input type="text" class="span2" placeholder="0" name="min">
-			  <input type="text" class="span2" placeholder="0" name="max">
-			  <button type="submit" class="btn">Peek</button>
-			</form>
+		<div id="buried_jobs_container" style="visibility:hidden">
+			<br/>
+			<h3>Current Jobs Buried</h3>
+      <canvas id="buried_jobs_chart" data-set='<%= "#{@buried_jobs_data.to_json.to_s}" %>'></canvas>
 		</div>
-		
-		<div class="span6">
-			<div id="total_jobs_container">
-				<h3>Total Jobs</h3>
-	      <canvas id="total_jobs_chart" data-set='<%= "#{@total_jobs_data.to_json.to_s}" %>'></canvas>
-			</div>
-			<div id="buried_jobs_container" style="visibility:hidden">
-				<br/>
-				<h3>Current Jobs Buried</h3>
-	      <canvas id="buried_jobs_chart" data-set='<%= "#{@buried_jobs_data.to_json.to_s}" %>'></canvas>
-			</div>
-		</div>
-  </div>
+	</div>
 </div>
 
 <%= erb :job_info_popup %>
