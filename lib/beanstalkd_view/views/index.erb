@@ -100,8 +100,9 @@
         <thead>
           <tr>
             <th>Tubes</th>
-            <th>Jobs Buried</th>
-            <th>Bury Rate</th>
+            <th>Ready</th>
+            <th>Buried</th>
+            <th>Buried/Total Rate</th>
             <th>Total Jobs</th>
           </tr>
         </thead>
@@ -111,9 +112,14 @@
           <% tube_names << tube.name.strip %>
   		    <tr>
   			    <td><a href="<%= u("/tube/#{CGI::escape(tube.name)}") %>"><%= tube.name %></a></td>
-            <td><%= tube.stats.current_jobs_buried %> </td>
-            <td><%= tube.stats.cmd_reserve.to_f == 0.0 ? 0 : tube.stats.cmd_bury.to_f / tube.stats.cmd_reserve.to_f %> </td>
-            <td><%= tube.stats.total_jobs %> </td>
+            <% if tube.stats.current_jobs_urgent > 0 %>
+                    <td class="data_cell"><span class="badge badge-warning"><%= tube.stats.current_jobs_urgent + tube.stats.current_jobs_ready %></span></td>
+            <% else %>
+                    <td class="data_cell"><%= tube.stats.current_jobs_ready %></td>
+            <% end %>
+            <td class="data_cell"><%= tube.stats.current_jobs_buried %></td>
+            <td class="data_cell"><%= tube.stats.total_jobs.to_f == 0.0 ? 0.0 : tube.stats.current_jobs_buried.to_f / tube.stats.total_jobs.to_f %> </td>
+            <td class="data_cell"><%= tube.stats.total_jobs %> </td>
   		    </tr>
 		    <% end %>
 		    </tbody>
