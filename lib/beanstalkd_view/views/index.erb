@@ -113,7 +113,7 @@
   		    <tr>
   			    <td><a href="<%= u("/tube/#{CGI::escape(tube.name)}") %>"><%= tube.name %></a></td>
             <% if tube.stats.current_jobs_urgent > 0 %>
-                    <td class="data_cell"><span class="badge badge-warning"><%= tube.stats.current_jobs_urgent + tube.stats.current_jobs_ready %></span></td>
+                    <td class="data_cell"><span class="badge badge-warning"><%= tube.stats.current_jobs_urgent %></span></td>
             <% else %>
                     <td class="data_cell"><%= tube.stats.current_jobs_ready %></td>
             <% end %>
